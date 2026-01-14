@@ -15,13 +15,13 @@
             font-size: 16px; /* 基础字体大小 */
         }
 
-        @media (max-width: 575.98px) {
+        @media screen and (max-width: 575.98px) {
             html {
                 font-size: 14px; /* 小屏幕字体略小 */
             }
         }
 
-        @media (min-width: 992px) {
+        @media screen and (min-width: 992px) {
             html {
                 font-size: 18px; /* 大屏幕字体略大 */
             }
@@ -38,111 +38,73 @@
             overflow: hidden; /* 防止初始动画时出现滚动条 */
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: #333;
-            box-sizing: border-box; /* 确保 padding 不会增加总宽度 */
-            padding: 1.25rem; /* 增加页面边缘的内边距，防止内容太贴边 */
+            box-sizing: border-box;
+            padding: 1.25rem;
         }
 
         /* 主动画容器，用于定位所有动画元素 */
         .animation-container {
-            position: relative;
-            width: 100%; /* 占据父容器的全部宽度 */
-            max-width: 37.5rem; /* 最大宽度，例如 600px */
-            /* 原始计算高度为图标落下高度 + 文字高度，现在改为动态 */
-            height: 6.25rem; /* 约 100px: (图标尺寸3.75rem + 竖线高度2.8125rem) */ 
-            display: flex; /* 使用flexbox来方便内部元素的相对定位和居中 */
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 1.875rem; /* 与下方文本的距离，约 30px */
-            /* background-color: rgba(255, 0, 0, 0.1); /* 调试用，可删除 */ */
+            position: relative; /* 为内部绝对定位元素提供参考 */
+            width: 100%;
+            max-width: 37.5rem; /* 600px */
+            height: 6.25rem; /* 100px */
+            /* 移除这里的flexbox布局，因为子元素都是绝对定位，它们不参与flex流 */
+            /* 如果需要居中标题组，将通过调整子元素的left/transform来实现 */
+            margin-bottom: 1.875rem; /* 30px */
         }
 
         /* 图标样式 */
         .icon {
             position: absolute;
-            width: 3.75rem; /* 图标大小，60px */
+            width: 3.75rem; /* 60px */
             height: 3.75rem;
             top: 0;
-            left: 50%;
-            /* 初始位置：屏幕上方，垂直偏移约 -150px，水平居中 */
-            transform: translate(-50%, -9.375rem); /* -150px */
+            left: 50%; /* 初始居中定位点 */
+            transform: translate(-50%, -9.375rem); /* 初始位置：屏幕上方，垂直偏移约 -150px，水平居中 */
             opacity: 0;
-            /* 动画定义 - 速度加快 */
-            -webkit-animation: icon-sequence 2s ease-in-out forwards;
             animation: icon-sequence 2s ease-in-out forwards;
         }
 
-        /* 图标动画关键帧 */
-        @-webkit-keyframes icon-sequence {
-            0% {
-                opacity: 0;
-                -webkit-transform: translate(-50%, -9.375rem); /* 初始顶部，透明 */
-            }
-            15% {
-                opacity: 1;
-                -webkit-transform: translate(-50%, 0.9375rem);   /* 落下，略微超过目标点，15px */
-            }
-            25% {
-                -webkit-transform: translate(-50%, 0);      /* 回弹，到达Y轴目标点 */
-            }
-            60% {
-                -webkit-transform: translate(-50%, 0);      /* 保持Y轴位置，准备左移 */
-            }
-            100% {
-                opacity: 1;
-                -webkit-transform: translate(-13.75rem, 0);    /* 向左移动到最终位置，-220px */
-            }
-        }
+        /* 图标动画关键帧 (大屏幕默认) */
         @keyframes icon-sequence {
             0% {
                 opacity: 0;
-                transform: translate(-50%, -9.375rem);
+                transform: translate(-50%, -9.375rem); /* 初始顶部，透明 */
             }
             15% {
                 opacity: 1;
-                transform: translate(-50%, 0.9375rem);
+                transform: translate(-50%, 0.9375rem);   /* 落下，略微超过目标点，15px */
             }
             25% {
-                transform: translate(-50%, 0);
+                transform: translate(-50%, 0);      /* 回弹，到达Y轴目标点 */
             }
             60% {
-                transform: translate(-50%, 0);
+                transform: translate(-50%, 0);      /* 保持Y轴位置，准备左移 */
             }
             100% {
                 opacity: 1;
-                transform: translate(-13.75rem, 0); /* -220px */
+                /* 最终位置：-13.75rem 是在 left:50% + transform:translate(-50%) 之后再向左移动的距离 */
+                transform: translate(calc(-50% - 13.75rem), 0); /* 向左移动到最终位置 */
             }
         }
 
         /* 竖线样式 */
         .vertical-line {
             position: absolute;
-            /* 根据图标最终位置调整，确保在图标右侧，(50%-150px) */
+            /* 原始计算：left: 50% - 9.375rem */
             left: calc(50% - 9.375rem); 
-            top: 1.25rem; /* 约 20px */
+            top: 1.25rem; /* 20px (图标上半部分距离顶部的距离) */
             width: 0.1875rem; /* 3px */
             height: 2.8125rem; /* 45px */
             background-color: #007bff;
             transform: scaleY(0); /* 初始状态：高度为0 */
             transform-origin: top; /* 变换原点：顶部 */
             opacity: 0;
-            /* 动画定义 - 速度加快，且在图标动画结束后立即开始 */
-            -webkit-animation: draw-line 0.5s ease-out forwards;
             animation: draw-line 0.5s ease-out forwards;
-            -webkit-animation-delay: 2s; /* 在图标动画结束后0秒开始 */
-            animation-delay: 2s;
+            animation-delay: 2s; /* 在图标动画结束后0秒开始 */
         }
 
         /* 竖线动画关键帧 */
-        @-webkit-keyframes draw-line {
-            0% {
-                -webkit-transform: scaleY(0);
-                opacity: 0;
-            }
-            100% {
-                -webkit-transform: scaleY(1);
-                opacity: 1;
-            }
-        }
         @keyframes draw-line {
             0% {
                 transform: scaleY(0);
@@ -157,42 +119,32 @@
         /* 文字XueleSense的容器，用于实现从左侧划出效果 */
         .text-wrapper {
             position: absolute;
-            /* 竖线位置 + 竖线宽度(3px) + 间距(10px) => 50% - 9.375rem + 0.1875rem + 0.625rem */
-            left: calc(50% - 9.375rem + 0.1875rem + 0.625rem); 
-            top: 1.5625rem; /* 约 25px */
-            height: 1.875rem; /* 约 30px，确保能包含文字 */
-            overflow: hidden; /* 隐藏容器外部的文字 */
-            white-space: nowrap; /* 防止文字换行 */
+            /* 原始计算：left: calc(50% - 9.375rem + 0.1875rem + 0.625rem) = calc(50% - 8.5625rem) */
+            left: calc(50% - 8.5625rem); 
+            top: 1.5625rem; /* 25px */
+            height: 1.875rem; /* 30px */
+            overflow: hidden;
+            white-space: nowrap;
             width: 0; /* 初始宽度为0 */
-            /* 动画定义 - 速度加快，且在竖线动画结束后略微延迟开始 */
-            -webkit-animation: reveal-text 0.7s ease-out forwards;
             animation: reveal-text 0.7s ease-out forwards;
             /* 延迟：2s (icon) + 0.5s (line) + 0.1s (小间隙) = 2.6s */
-            -webkit-animation-delay: 2.6s; 
-            animation-delay: 2.6s;
+            animation-delay: 2.6s; 
         }
 
         .xuelesense-text {
             font-size: 1.5rem; /* 24px */
             font-weight: bold;
             color: #333;
+            line-height: 1.875rem; /* 30px, 与父容器高度一致 */
         }
 
         /* 文字容器动画关键帧 */
-        @-webkit-keyframes reveal-text {
-            0% {
-                width: 0;
-            }
-            100% {
-                width: 8.75rem; /* 足够显示 "XueleSense" 的宽度，约 140px */
-            }
-        }
         @keyframes reveal-text {
             0% {
                 width: 0;
             }
             100% {
-                width: 8.75rem;
+                width: 8.75rem; /* 140px, 足够显示 "XueleSense" */
             }
         }
 
@@ -200,17 +152,126 @@
         .content-after-animation {
             font-size: 1.125rem; /* 18px */
             opacity: 0; /* 初始透明 */
-            text-align: center; /* 确保更新内容文本居中 */
-            margin-top: 0.625rem; /* 增加一些上边距 */
-            /* 动画定义 - 速度加快，在所有动画结束后继续显示 */
-            -webkit-animation: fade-in 0.5s ease-out forwards;
+            text-align: center;
+            margin-top: 0.625rem; /* 10px */
             animation: fade-in 0.5s ease-out forwards;
-            /* 延迟：2.6s (text_reveal_start) + 0.7s (text_reveal_duration) + 0.2s (小间隙) = 3.5s */
-            -webkit-animation-delay: 3.5s; 
-            animation-delay: 3.5s;
+            /* 延迟：2.6s (reveal_text_start) + 0.7s (reveal_text_duration) + 0.2s (小间隙) = 3.5s */
+            animation-delay: 3.5s; 
+            max-width: 37.5rem; /* 限制宽度 */
         }
 
         /* 淡入动画关键帧 */
+        @keyframes fade-in {
+            0% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+
+        /* ========================================================== */
+        /* 小屏幕样式调整：使整个标题单元居中 */
+        /* ========================================================== */
+        @media screen and (max-width: 575.98px) {
+            /* 
+             * 计算逻辑：
+             *
+             * 1. 确定标题单元在当前大屏幕布局下的总宽度和中心点。
+             *    - 图标宽度: 3.75rem (60px)
+             *    - 竖线宽度: 0.1875rem (3px)
+             *    - 文字宽度: 8.75rem (140px)
+             *    - 图标的最终中心点相对于 `50%` 是 `50% - 13.75rem`
+             *    - 图标的最终左边缘: `50% - 13.75rem - (3.75rem / 2) = 50% - 13.75rem - 1.875rem = 50% - 15.625rem`
+             *    - 竖线的最终左边缘: `50% - 9.375rem`
+             *    - 文字的最终左边缘: `50% - 8.5625rem`
+             *    - 文字的最终右边缘: `50% - 8.5625rem + 8.75rem = 50% + 0.1875rem`
+             *
+             *    - 整个标题单元的最左侧: `50% - 15.625rem`
+             *    - 整个标题单元的最右侧: `50% + 0.1875rem`
+             *    - 整个标题单元的宽度: `(50% + 0.1875rem) - (50% - 15.625rem) = 15.8125rem`
+             *    - 整个标题单元的当前中心点: `((50% - 15.625rem) + (50% + 0.1875rem)) / 2 = 50% - 7.71875rem`
+             *
+             * 2. 我们希望标题单元的中心点从 `50% - 7.71875rem` 移动到 `50%`。
+             *    这意味着需要对整个标题单元进行一个 `+7.71875rem` 的水平位移。
+             *
+             * 3. 由于每个元素都是绝对定位的，并且其 `left` 和 `transform` 都是相对于 `animation-container` 的 `50%` 来计算的，
+             *    所以我们将这个 `+7.71875rem` 的位移叠加到每个元素的最终水平位置上。
+             */
+
+            /* 定义小屏幕下图标动画的关键帧 */
+            @keyframes icon-sequence {
+                0% {
+                    opacity: 0;
+                    transform: translate(-50%, -9.375rem);
+                }
+                15% {
+                    opacity: 1;
+                    transform: translate(-50%, 0.9375rem);
+                }
+                25% {
+                    transform: translate(-50%, 0);
+                }
+                60% {
+                    transform: translate(-50%, 0);
+                }
+                100% {
+                    opacity: 1;
+                    /* 图标最终X平移量: 原始 -13.75rem + 居中所需位移 7.71875rem = -6.03125rem */
+                    transform: translate(calc(-50% - 6.03125rem), 0);
+                }
+            }
+
+            .vertical-line {
+                /* 竖线最终左边缘: 原始 (50% - 9.375rem) + 居中所需位移 7.71875rem = 50% - 1.65625rem */
+                left: calc(50% - 1.65625rem);
+            }
+
+            .text-wrapper {
+                /* 文字最终左边缘: 原始 (50% - 8.5625rem) + 居中所需位移 7.71875rem = 50% - 0.84375rem */
+                left: calc(50% - 0.84375rem);
+            }
+        }
+
+        /* Webkit前缀兼容性 */
+        @-webkit-keyframes icon-sequence {
+            0% {
+                opacity: 0;
+                -webkit-transform: translate(-50%, -9.375rem);
+            }
+            15% {
+                opacity: 1;
+                -webkit-transform: translate(-50%, 0.9375rem);
+            }
+            25% {
+                -webkit-transform: translate(-50%, 0);
+            }
+            60% {
+                -webkit-transform: translate(-50%, 0);
+            }
+            100% {
+                opacity: 1;
+                -webkit-transform: translate(calc(-50% - 13.75rem), 0);
+            }
+        }
+        @-webkit-keyframes draw-line {
+            0% {
+                -webkit-transform: scaleY(0);
+                opacity: 0;
+            }
+            100% {
+                -webkit-transform: scaleY(1);
+                opacity: 1;
+            }
+        }
+        @-webkit-keyframes reveal-text {
+            0% {
+                width: 0;
+            }
+            100% {
+                width: 8.75rem;
+            }
+        }
         @-webkit-keyframes fade-in {
             0% {
                 opacity: 0;
@@ -219,12 +280,14 @@
                 opacity: 1;
             }
         }
-        @keyframes fade-in {
-            0% {
-                opacity: 0;
-            }
-            100% {
-                opacity: 1;
+
+        @media screen and (max-width: 575.98px) {
+            @-webkit-keyframes icon-sequence {
+                0% { opacity: 0; -webkit-transform: translate(-50%, -9.375rem); }
+                15% { opacity: 1; -webkit-transform: translate(-50%, 0.9375rem); }
+                25% { -webkit-transform: translate(-50%, 0); }
+                60% { -webkit-transform: translate(-50%, 0); }
+                100% { opacity: 1; -webkit-transform: translate(calc(-50% - 6.03125rem), 0); }
             }
         }
     </style>
