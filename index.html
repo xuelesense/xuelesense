@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>动态效果演示</title>
+    <style>
+        /* 
+         * 基础字体大小设置，用于响应式调整。
+         * 默认 1rem = 16px
+         * 小屏幕（小于576px）时，1rem = 14px
+         * 大屏幕（大于992px）时，1rem = 18px
+         */
+        html {
+            font-size: 16px; /* 基础字体大小 */
+        }
+
+        @media (max-width: 575.98px) {
+            html {
+                font-size: 14px; /* 小屏幕字体略小 */
+            }
+        }
+
+        @media (min-width: 992px) {
+            html {
+                font-size: 18px; /* 大屏幕字体略大 */
+            }
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            overflow: hidden; /* 防止初始动画时出现滚动条 */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+            box-sizing: border-box; /* 确保 padding 不会增加总宽度 */
+            padding: 1.25rem; /* 增加页面边缘的内边距，防止内容太贴边 */
+        }
+
+        /* 主动画容器，用于定位所有动画元素 */
+        .animation-container {
+            position: relative;
+            width: 100%; /* 占据父容器的全部宽度 */
+            max-width: 37.5rem; /* 最大宽度，例如 600px */
+            /* 原始计算高度为图标落下高度 + 文字高度，现在改为动态 */
+            height: 6.25rem; /* 约 100px: (图标尺寸3.75rem + 竖线高度2.8125rem) */ 
+            display: flex; /* 使用flexbox来方便内部元素的相对定位和居中 */
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 1.875rem; /* 与下方文本的距离，约 30px */
+            /* background-color: rgba(255, 0, 0, 0.1); /* 调试用，可删除 */ */
+        }
+
+        /* 图标样式 */
+        .icon {
+            position: absolute;
+            width: 3.75rem; /* 图标大小，60px */
+            height: 3.75rem;
+            top: 0;
+            left: 50%;
+            /* 初始位置：屏幕上方，垂直偏移约 -150px，水平居中 */
+            transform: translate(-50%, -9.375rem); /* -150px */
+            opacity: 0;
+            /* 动画定义 - 速度加快 */
+            -webkit-animation: icon-sequence 2s ease-in-out forwards;
+            animation: icon-sequence 2s ease-in-out forwards;
+        }
+
+        /* 图标动画关键帧 */
+        @-webkit-keyframes icon-sequence {
+            0% {
+                opacity: 0;
+                -webkit-transform: translate(-50%, -9.375rem); /* 初始顶部，透明 */
+            }
+            15% {
+                opacity: 1;
+                -webkit-transform: translate(-50%, 0.9375rem);   /* 落下，略微超过目标点，15px */
+            }
+            25% {
+                -webkit-transform: translate(-50%, 0);      /* 回弹，到达Y轴目标点 */
+            }
+            60% {
+                -webkit-transform: translate(-50%, 0);      /* 保持Y轴位置，准备左移 */
+            }
+            100% {
+                opacity: 1;
+                -webkit-transform: translate(-13.75rem, 0);    /* 向左移动到最终位置，-220px */
+            }
+        }
+        @keyframes icon-sequence {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -9.375rem);
+            }
+            15% {
+                opacity: 1;
+                transform: translate(-50%, 0.9375rem);
+            }
+            25% {
+                transform: translate(-50%, 0);
+            }
+            60% {
+                transform: translate(-50%, 0);
+            }
+            100% {
+                opacity: 1;
+                transform: translate(-13.75rem, 0); /* -220px */
+            }
+        }
+
+        /* 竖线样式 */
+        .vertical-line {
+            position: absolute;
+            /* 根据图标最终位置调整，确保在图标右侧，(50%-150px) */
+            left: calc(50% - 9.375rem); 
+            top: 1.25rem; /* 约 20px */
+            width: 0.1875rem; /* 3px */
+            height: 2.8125rem; /* 45px */
+            background-color: #007bff;
+            transform: scaleY(0); /* 初始状态：高度为0 */
+            transform-origin: top; /* 变换原点：顶部 */
+            opacity: 0;
+            /* 动画定义 - 速度加快，且在图标动画结束后立即开始 */
+            -webkit-animation: draw-line 0.5s ease-out forwards;
+            animation: draw-line 0.5s ease-out forwards;
+            -webkit-animation-delay: 2s; /* 在图标动画结束后0秒开始 */
+            animation-delay: 2s;
+        }
+
+        /* 竖线动画关键帧 */
+        @-webkit-keyframes draw-line {
+            0% {
+                -webkit-transform: scaleY(0);
+                opacity: 0;
+            }
+            100% {
+                -webkit-transform: scaleY(1);
+                opacity: 1;
+            }
+        }
+        @keyframes draw-line {
+            0% {
+                transform: scaleY(0);
+                opacity: 0;
+            }
+            100% {
+                transform: scaleY(1);
+                opacity: 1;
+            }
+        }
+
+        /* 文字XueleSense的容器，用于实现从左侧划出效果 */
+        .text-wrapper {
+            position: absolute;
+            /* 竖线位置 + 竖线宽度(3px) + 间距(10px) => 50% - 9.375rem + 0.1875rem + 0.625rem */
+            left: calc(50% - 9.375rem + 0.1875rem + 0.625rem); 
+            top: 1.5625rem; /* 约 25px */
+            height: 1.875rem; /* 约 30px，确保能包含文字 */
+            overflow: hidden; /* 隐藏容器外部的文字 */
+            white-space: nowrap; /* 防止文字换行 */
+            width: 0; /* 初始宽度为0 */
+            /* 动画定义 - 速度加快，且在竖线动画结束后略微延迟开始 */
+            -webkit-animation: reveal-text 0.7s ease-out forwards;
+            animation: reveal-text 0.7s ease-out forwards;
+            /* 延迟：2s (icon) + 0.5s (line) + 0.1s (小间隙) = 2.6s */
+            -webkit-animation-delay: 2.6s; 
+            animation-delay: 2.6s;
+        }
+
+        .xuelesense-text {
+            font-size: 1.5rem; /* 24px */
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* 文字容器动画关键帧 */
+        @-webkit-keyframes reveal-text {
+            0% {
+                width: 0;
+            }
+            100% {
+                width: 8.75rem; /* 足够显示 "XueleSense" 的宽度，约 140px */
+            }
+        }
+        @keyframes reveal-text {
+            0% {
+                width: 0;
+            }
+            100% {
+                width: 8.75rem;
+            }
+        }
+
+        /* 更新内容文本样式 */
+        .content-after-animation {
+            font-size: 1.125rem; /* 18px */
+            opacity: 0; /* 初始透明 */
+            text-align: center; /* 确保更新内容文本居中 */
+            margin-top: 0.625rem; /* 增加一些上边距 */
+            /* 动画定义 - 速度加快，在所有动画结束后继续显示 */
+            -webkit-animation: fade-in 0.5s ease-out forwards;
+            animation: fade-in 0.5s ease-out forwards;
+            /* 延迟：2.6s (text_reveal_start) + 0.7s (text_reveal_duration) + 0.2s (小间隙) = 3.5s */
+            -webkit-animation-delay: 3.5s; 
+            animation-delay: 3.5s;
+        }
+
+        /* 淡入动画关键帧 */
+        @-webkit-keyframes fade-in {
+            0% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+        @keyframes fade-in {
+            0% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="animation-container">
+        <img src="https://i2.qyimage.store:2999/i/3c7575af173b403d" alt="XueleSense Icon" class="icon">
+        <div class="vertical-line"></div>
+        <div class="text-wrapper">
+            <span class="xuelesense-text">XueleSense</span>
+        </div>
+    </div>
+    
+    <div class="content-after-animation">
+        现在已经可以发通知秒删除，请在发通知后删除通知
+    </div>
+
+    <div class="content-after-animation">
+        更新内容
+    </div>
+    
+    <div class="content-after-animation">
+        1. 可以撤回自己看得见的通知
+    </div>
+</body>
+</html>
